@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #282c34; }
+        canvas { border: 1px solid white; }
+    </style>
+</head>
+<body>
+    <canvas id="pongCanvas" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById("pongCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Define Ball
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 15,
+            speed: 4,
+            dx: 4,
+            dy: 4,
+            image: new Image()
+        };
+        ball.image.src = 'ball.png';
+
+        // Paddle Image
+        const paddleImage = new Image();
+        paddleImage.src = 'paddle.png';
+
+        function drawBall() {
+            ctx.drawImage(ball.image, ball.x - ball.radius, ball.y - ball.radius, 2 * ball.radius, 2 * ball.radius);
+        }
+
+        function drawPaddle(x, y, flipped=false) {
+            ctx.save();
+            if (flipped) {
+                ctx.scale(-1, 1);
+                ctx.drawImage(paddleImage, -x - paddleImage.width, y);
+            } else {
+                ctx.drawImage(paddleImage, x, y);
+            }
+            ctx.restore();
+        }
+
+        function movePaddle(paddle, upKey, downKey) {
+            document.addEventListener("keydown", function(event) {
+                switch(event.keyCode) {
+                    case upKey:
+                        paddle.y -= 15;
+                        break;
+                    case downKey:
+                        paddle.y += 15;
+                        break;
+                }
+            });
+        }
+
+        function update() {
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            // Ball collision with top and bottom
+            if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+                ball.dy *= -1;
+            }
+
+            // Ball collision with paddles
+            if ((ball.dx > 0 && ball.x + ball.radius > computer.x) || 
+                (ball.dx < 0 && ball.x - ball.radius < player.x + paddleImage.width)) {
+                ball.dx *= -1;
+                // Here, you can add the "white bubbly paint" effect or any other effect you want
+            }
+
+            // Render
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();
+            drawPaddle(player.x, player.y);
+            drawPaddle(computer.x, computer.y, true);
+
+            requestAnimationFrame(update);
+        }
+
+        // Define Paddles
+        const player = { x: 0, y: canvas.height / 2 - paddleImage.height / 2 };
+        const computer = { x: canvas.width - paddleImage.width, y: canvas.height / 2 - paddleImage.height / 2 };
+
+        movePaddle(player, 38, 40);  // ArrowUp, ArrowDown for the player
+        movePaddle(computer, 87, 83);  // W, S for the computer
+
+        update();
+    </script>
+</body>
+</html>
